@@ -1,0 +1,58 @@
+body {
+  font-family: "Open Sans", sans-serif;
+  color: #333;
+}
+.uppercase {
+  text-transform: uppercase;
+}
+.white {
+  color: #fff;
+}
+.font14 {
+  font-size: 14px;
+}
+.font15 {
+  font-size: 15px;
+}
+.font16 {
+  font-size: 16px;
+}
+.font17 {
+  font-size: 17px;
+}
+.font18 {
+  font-size: 18px;
+}
+.font19 {
+  font-size: 19px;
+}
+.font20 {
+  font-size: 20px;
+}
+.w500 {
+  font-weight: 500;
+}
+.w600 {
+  font-weight: 600;
+}
+.w700 {
+  font-weight: 700;
+}
+.lh60 {
+  line-height: 60px;
+}
+.container {
+  background-color: antiquewhite;
+  min-height: 100vh;
+}
+.with-border {
+  border: 1px solid #909090;
+}
+.show-image {
+  max-height: 500px;
+  max-width: 100%;
+}
+.btn-primary:focus,
+.btn-primary:active {
+  box-shadow: none;
+}
