@@ -1,10 +1,8 @@
-import { useCallback, useRef, useState } from "react";
+import FormData from "form-data";
+import { useRef, useState } from "react";
 import Header from "../component/Header";
 import Info from "../component/Info";
 import Seo from "../component/Share/Seo";
-import { sendImage } from "../services/callApi";
-
-const serviceUrl = `http://a0ee-103-109-40-10.ngrok.io/predict`;
 
 const useDisplayImage = () => {
   const [result, setResult] = useState("");
@@ -17,7 +15,6 @@ const useDisplayImage = () => {
       reader.addEventListener("load", (e) => {
         setResult(e.target.result);
       });
-
       reader.readAsDataURL(imageFile);
     } else {
       setResult(null);
@@ -28,31 +25,49 @@ const useDisplayImage = () => {
 
 const Home = () => {
   const imageInputRef = useRef();
+  const rsRef = useRef();
   const [image, setImage] = useState();
   const [url, setUrl] = useState(``);
   const [selectModel, setSelectModel] = useState(1);
-  const [fetch, setFetch] = useState(false);
+  const [respone, setRespone] = useState();
+
   const { result, uploader } = useDisplayImage();
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = async () => {
     if (!image && !url) {
       alert(`Vui lòng chọn đủ thông tin`);
       return;
     }
     if (image) {
-      console.log(image);
-    } else {
-      const formData = new FormData();
-      formData.append(`url`, url);
-      // const rs = await sendImage(formData);
-      // console.log(rs);
-      const rs = await fetch(serviceUrl, {
+      console.log(result)
+      let rs = await fetch("/api/callImage", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ image: result }),
       });
-      console.log(rs)
+      rs = await rs.json();
+    } else {
+      let rs = await fetch("/api/callapi", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url }),
+      });
+      rs = await rs.json();
+      if (rs?.status === "ok") {
+        setRespone(rs);
+        setTimeout(() => {
+          rsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 500);
+      } else {
+        alert(`Đã có lỗi xảy ra`);
+        return;
+      }
     }
-  }, [image, url]);
+  };
 
   return (
     <>
@@ -75,6 +90,7 @@ const Home = () => {
                         placeholder="URL"
                         onChange={(e) => {
                           setUrl(e.target.value);
+                          setRespone(null);
                           setImage(null);
                           uploader();
                           imageInputRef.current.value = null;
@@ -89,6 +105,7 @@ const Home = () => {
                         setImage(e.target.files[0]);
                         uploader(e);
                         setUrl(``);
+                        setRespone(null);
                       }}
                       ref={imageInputRef}
                       multiple={false}
@@ -152,7 +169,6 @@ const Home = () => {
                     className="btn btn-primary"
                     type="submit"
                     value="Submit"
-                    disabled={fetch}
                     onClick={handleSubmit}
                   />
                 </div>
@@ -167,6 +183,25 @@ const Home = () => {
             )}
           </div>
         </div>
+        {respone && (
+          <div className="row pb-5">
+            <div className="col-12">
+              <div className="card-body" ref={rsRef}>
+                <div className="text-center mb-3">
+                  <h1>Result</h1>
+                </div>
+                <ul style={{ listStyle: `none`, padding: 0, margin: 0, paddingLeft: "50px" }}>
+                  {respone?.captions.map((item, inx) => (
+                    <li key={inx} className="mb-3">
+                      <b>{`Caption ${inx + 1}: `}</b>
+                      <span className="font18">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
